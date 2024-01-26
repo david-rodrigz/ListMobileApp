@@ -1,47 +1,55 @@
 import React, { useState } from 'react';
-import { FlatList, Text, SafeAreaView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { FlatList, TouchableOpacity, StyleSheet, Button, View } from 'react-native';
 
-// list items
-const DATA = [
-  { title: 'First Item', selected: false },
-  { title: 'Second Item', selected: false },
-  { title: 'Third Item', selected: false },
-];
+const DATA = Array.from({length: 5}, (_, i) => ({id: i.toString()}));
 
+const Item = ({ id, selected, onSelect }) => (
+  <TouchableOpacity
+    onPress={() => onSelect(id)}
+    style={[
+      styles.item,
+      { backgroundColor: selected ? 'blue' : 'grey' },
+    ]}
+  />
+);
 
-export default function App() {
-  // state array for list entries
-  const [listEntries, setlistEntries] = useState(DATA);
+const renderItem = (selectedId, onSelect) => ({ item }) => {
+  const backgroundColor = item.id === selectedId ? 'blue' : 'grey';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList style={styles.listContainer}
-        data = {listEntries}
-        renderItem = {({ item }) => <Text style={styles.listItem}>{item.title}</Text>}
-      />
-    </SafeAreaView>
+    <Item
+      id={item.id}
+      selected={backgroundColor === 'blue'}
+      onSelect={onSelect}
+    />
   );
-}
+};
 
 const styles = StyleSheet.create({
+  item: {
+    backgroundColor: 'grey',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
   container: {
     flex: 1,
-    alignSelf: 'stretch',
-    paddingLeft: 20,
-    paddingRight: 20,
-    borderWidth: 1,
+    padding: 40,
   },
-  listContainer: {
-    flex: 1,
-    alignSelf: 'stretch',
-  },
-  listItem: {
-    padding: 6,
-  },
-  selectedItem: {
-    borderWidth: 1,
-    borderBlockColor: 'blue',
-    borderRadius: 6,
-    padding: 6,
-  }
 });
+
+export default function App() {
+  const [selectedId, setSelectedId] = useState(null);
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={DATA}
+        renderItem={renderItem(selectedId, setSelectedId)}
+        keyExtractor={(item) => item.id}
+        extraData={selectedId}
+      />
+      <Button title="Reset" onPress={() => setSelectedId(null)} />
+    </View>
+  );
+}
