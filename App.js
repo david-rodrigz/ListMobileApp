@@ -30,6 +30,15 @@ export default function App() {
     const newData = data.filter(item => !selectedIds.includes(item.id));
     setData(newData);
     setSelectedIds([]); // Clear selection after deletion
+    console.log(data);
+  };
+
+  const addNewItem = () => {
+    const newId = data.length == 0 ? 0 : Math.max(...data.map(item => parseInt(item.id))) + 1;
+    const newItem = { id: newId.toString() };
+    setData([...data, newItem]);
+    setSelectedIds([]); // Clear selection after deletion
+    console.log(data);
   };
   
   return (
@@ -42,6 +51,7 @@ export default function App() {
         />
       <Button title="Reset" onPress={() => setSelectedIds([])} />
       <Button title="Delete" onPress={deleteSelectedItems} />
+      <Button title="Add" onPress={addNewItem} />
     </SafeAreaView>
   );
 }
