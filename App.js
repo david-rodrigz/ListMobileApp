@@ -1,13 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { KeyboardAvoidingView, FlatList, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Button } from 'react-native';
 
-// const DATA = Array.from({length: 5}, (_, i) => ({id: i.toString()}));
 const DATA = [
-  { "id": "0", "text": "A" }, 
-  { "id": "1", "text": "B" }, 
-  { "id": "2", "text": "C" }, 
-  { "id": "3", "text": "D" }, 
-  { "id": "4", "text": "E" }
+  { "id": "0", "text": "🦥" }, 
+  { "id": "1", "text": "🐊" }, 
+  { "id": "2", "text": "🦈" }, 
 ];
 
 const handleOnSelect = (selectedIds, setSelected, id) => {
@@ -44,11 +41,53 @@ export default function App() {
   const [displayPrompt, setDisplayPrompt] = useState(false);
   const inputRef = useRef();
 
+  const joinSelectedItems = () => {
+    // join every selected item's text
+    let itemText = "";
+    for(let i = 0; i < selectedIds.length; i++) {
+      const item = data.find(item => item.id === selectedIds[i]);
+      itemText += item.text;
+      if (i != selectedIds.length - 1) {
+        itemText += ", ";
+      }
+    }
+
+    // remove selected items from data
+    const newData = data.filter(item => !selectedIds.includes(item.id));
+    
+    // add new item to data
+    const newId = newData.length == 0 ? 0 : Math.max(...newData.map(item => parseInt(item.id))) + 1;
+    const newItem = { id: newId.toString(), text: itemText ? itemText : "" };
+    setData([...newData, newItem]);
+    
+    setSelectedIds([]); // Clear selection after joining
+  }
+
+  const splitSelectedItems = () => {
+    // split selected item's text into multiple items
+    const item = data.find(item => item.id === selectedIds[0]);
+    const itemText = item.text;
+    const splitText = itemText.split(", ");
+
+    // remove selected item from data
+    const newData = data.filter(item => !selectedIds.includes(item.id));
+
+    // add new items to data
+    const newIds = [];
+    for(let i = 0; i < splitText.length; i++) {
+      const newId = newData.length == 0 ? 0 : Math.max(...newData.map(item => parseInt(item.id))) + 1;
+      const newItem = { id: newId.toString(), text: splitText[i] ? splitText[i] : "" };
+      newData.push(newItem);
+      newIds.push(newId.toString());
+    }
+    setData(newData);
+    setSelectedIds(newIds); // Select new items after splitting
+  }
+
   const deleteSelectedItems = () => {
     const newData = data.filter(item => !selectedIds.includes(item.id));
     setData(newData);
     setSelectedIds([]); // Clear selection after deletion
-    console.log(data); // Debug
   };
 
   const addNewItem = (itemText) => {
@@ -57,7 +96,6 @@ export default function App() {
     setData([...data, newItem]);
     setSelectedIds([]); // Clear selection after addition
     setDisplayPrompt(false); // Hide prompt after addition
-    console.log(data); // Debug
   };
   
   return (
@@ -68,8 +106,9 @@ export default function App() {
         keyExtractor={(item) => item.id}
         extraData={selectedIds}
       />
-      <Button title="Reset" onPress={() => setSelectedIds([])} />
-      <Button title="Delete" onPress={deleteSelectedItems} />
+      <Button title="Join" disabled={selectedIds.length <= 1} onPress={joinSelectedItems} />
+      <Button title="Split" disabled={selectedIds.length != 1} onPress={splitSelectedItems} />
+      <Button title="Delete" disabled={selectedIds.length == 0} onPress={deleteSelectedItems} />
       <Button title="Add" onPress={() => { 
         setDisplayPrompt(true); 
         inputRef.current.focus(); // Focus on text input
