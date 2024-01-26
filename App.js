@@ -1,26 +1,29 @@
 import React, { useState } from 'react';
-import { FlatList, TouchableOpacity, StyleSheet, Button, View } from 'react-native';
+import { FlatList, TouchableOpacity, StyleSheet, SafeAreaView, Button } from 'react-native';
 
 const DATA = Array.from({length: 5}, (_, i) => ({id: i.toString()}));
 
-const Item = ({ id, selected, onSelect }) => (
+const Item = ({ id, selectedIds, backgroundColor, setSelected }) => (
   <TouchableOpacity
-    onPress={() => onSelect(id)}
+    onPress={() => {
+      setSelected([...selectedIds, id])
+    }}
     style={[
       styles.item,
-      { backgroundColor: selected ? 'blue' : 'grey' },
+      { backgroundColor: backgroundColor ? 'blue' : 'grey' },
     ]}
   />
 );
 
-const renderItem = (selectedId, onSelect) => ({ item }) => {
-  const backgroundColor = item.id === selectedId ? 'blue' : 'grey';
+const renderItem = (selectedIds, setSelected) => ({ item }) => {
+  const backgroundColor = selectedIds.includes(item.id) ? 'blue' : 'grey';
 
   return (
     <Item
       id={item.id}
-      selected={backgroundColor === 'blue'}
-      onSelect={onSelect}
+      selectedIds={selectedIds}
+      backgroundColor={backgroundColor === 'blue'}
+      setSelected={setSelected}
     />
   );
 };
@@ -34,22 +37,21 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 40,
   },
 });
 
 export default function App() {
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <FlatList
         data={DATA}
-        renderItem={renderItem(selectedId, setSelectedId)}
+        renderItem={renderItem(selectedIds, setSelectedIds)}
         keyExtractor={(item) => item.id}
-        extraData={selectedId}
+        extraData={selectedIds}
       />
-      <Button title="Reset" onPress={() => setSelectedId(null)} />
-    </View>
+      <Button title="Reset" onPress={() => setSelectedIds([])} />
+    </SafeAreaView>
   );
 }
