@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { KeyboardAvoidingView, FlatList, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Button } from 'react-native';
+import { Platform, KeyboardAvoidingView, FlatList, Text, TextInput, TouchableOpacity, View, StyleSheet, SafeAreaView, Button } from 'react-native';
 
 const DATA = [
   { "id": "0", "text": "🦥" }, 
@@ -61,6 +61,7 @@ export default function App() {
     setData([...newData, newItem]);
     
     setSelectedIds([]); // Clear selection after joining
+    setSelectedIds([newId.toString()]); // Select new item after joining
   }
 
   const splitSelectedItems = () => {
@@ -91,8 +92,11 @@ export default function App() {
   };
 
   const addNewItem = (itemText) => {
+    if (!itemText) {
+      return;
+    }
     const newId = data.length == 0 ? 0 : Math.max(...data.map(item => parseInt(item.id))) + 1;
-    const newItem = { id: newId.toString(), text: itemText ? itemText : "" };
+    const newItem = { id: newId.toString(), text: itemText};
     setData([...data, newItem]);
     setSelectedIds([]); // Clear selection after addition
     setDisplayPrompt(false); // Hide prompt after addition
@@ -106,13 +110,18 @@ export default function App() {
         keyExtractor={(item) => item.id}
         extraData={selectedIds}
       />
-      <Button title="Join" disabled={selectedIds.length <= 1} onPress={joinSelectedItems} />
-      <Button title="Split" disabled={selectedIds.length != 1} onPress={splitSelectedItems} />
-      <Button title="Delete" disabled={selectedIds.length == 0} onPress={deleteSelectedItems} />
-      <Button title="Add" onPress={() => { 
-        setDisplayPrompt(true); 
-        inputRef.current.focus(); // Focus on text input
-      }} />
+      <View style={styles.buttonsContainer}>
+        <Button title="Join" disabled={selectedIds.length <= 1} onPress={joinSelectedItems} />
+        <Button title="Split" 
+        disabled={selectedIds.length != 1 
+          || (selectedIds.length == 1 && !data.find(item => item.id === selectedIds[0]).text.includes(", "))} 
+        onPress={splitSelectedItems} />
+        <Button title="Delete" disabled={selectedIds.length == 0} onPress={deleteSelectedItems} />
+        <Button title="Add" onPress={() => { 
+          setDisplayPrompt(true); 
+          inputRef.current.focus(); // Focus on text input
+        }} />
+      </View>
 
       {/* New list item prompt text box */}
       <KeyboardAvoidingView 
@@ -139,6 +148,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: 10,
   },
   textContainer: {
     padding: 8,
