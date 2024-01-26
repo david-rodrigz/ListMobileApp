@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { KeyboardAvoidingView, FlatList, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Button } from 'react-native';
+import { KeyboardAvoidingView, FlatList, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Button } from 'react-native';
 
 // const DATA = Array.from({length: 5}, (_, i) => ({id: i.toString()}));
 const DATA = [
-  { "id": "0", "item": "A" }, 
-  { "id": "1", "item": "B" }, 
-  { "id": "2", "item": "C" }, 
-  { "id": "3", "item": "D" }, 
-  { "id": "4", "item": "E" }
+  { "id": "0", "text": "A" }, 
+  { "id": "1", "text": "B" }, 
+  { "id": "2", "text": "C" }, 
+  { "id": "3", "text": "D" }, 
+  { "id": "4", "text": "E" }
 ];
 
 const handleOnSelect = (selectedIds, setSelected, id) => {
@@ -19,20 +19,28 @@ const handleOnSelect = (selectedIds, setSelected, id) => {
 }
 
 const renderItem = (selectedIds, setSelected) => ({ item }) => {
-  const backgroundColor = selectedIds.includes(item.id) ? 'blue' : 'grey';
+  const borderColor = selectedIds.includes(item.id) ? '#72a4d4' : 'white';
+  const backgroundColor = selectedIds.includes(item.id) ? '#f4f4f4' : 'white';
 
   return (
     <TouchableOpacity
       onPress={() => handleOnSelect(selectedIds, setSelected, item.id)}
-      style={[styles.item, { backgroundColor: backgroundColor }]}
-    />
+      style={[
+        styles.textContainer, 
+        { borderWidth: 2 }, 
+        { backgroundColor: backgroundColor }, 
+        { borderColor: borderColor }
+      ]}
+    >
+      <Text style={styles.text}>{item.text}</Text>
+    </TouchableOpacity>
   );
 };
 
 export default function App() {
   const [data, setData] = useState(DATA);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [newItemText, setNewItemText] = useState();
+  const [newText, setNewText] = useState();
   const [displayPrompt, setDisplayPrompt] = useState(false);
   const inputRef = useRef();
 
@@ -45,7 +53,7 @@ export default function App() {
 
   const addNewItem = (itemText) => {
     const newId = data.length == 0 ? 0 : Math.max(...data.map(item => parseInt(item.id))) + 1;
-    const newItem = { id: newId.toString(), item: itemText ? itemText : "" };
+    const newItem = { id: newId.toString(), text: itemText ? itemText : "" };
     setData([...data, newItem]);
     setSelectedIds([]); // Clear selection after addition
     setDisplayPrompt(false); // Hide prompt after addition
@@ -76,12 +84,12 @@ export default function App() {
           ref={inputRef} // Ref for focusing on text input
           style={[styles.input, {display: displayPrompt ? 'flex' : 'none'}]} 
           placeholder={'New Item'} 
-          value={newItemText} 
-          onChangeText={text => setNewItemText(text)} 
+          value={newText} 
+          onChangeText={text => setNewText(text)} 
           onBlur={() => setDisplayPrompt(false)} // Hide prompt when text input is deselected
           onSubmitEditing= {() => {
-            addNewItem(newItemText);
-            setNewItemText(null);
+            addNewItem(newText);
+            setNewText(null);
           }}
         />
       </KeyboardAvoidingView>
@@ -90,14 +98,17 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  item: {
-    backgroundColor: 'grey',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-  },
   container: {
     flex: 1,
+  },
+  textContainer: {
+    padding: 8,
+    borderRadius: 6,
+    marginVertical: 4,
+    marginHorizontal: 20,
+  },
+  text: {
+    fontSize: 20,
   },
   newItemPrompt: {
     position: 'absolute',
@@ -110,10 +121,11 @@ const styles = StyleSheet.create({
   input: {
     paddingVertical: 15,
     paddingHorizontal: 15,
-    backgroundColor: '#FFF',
-    borderRadius: 60,
-    borderColor: '#C0C0C0',
+    marginBottom: 10,
     borderWidth: 1,
-    width: 250,
+    borderRadius: 60,
+    backgroundColor: 'white',
+    borderColor: '#C0C0C0',
+    width: '90%',
   },
 });
