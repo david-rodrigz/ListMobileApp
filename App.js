@@ -3,7 +3,7 @@ import { FlatList, TouchableOpacity, StyleSheet, SafeAreaView, Button } from 're
 
 const DATA = Array.from({length: 5}, (_, i) => ({id: i.toString()}));
 
-const handleOnPress = (selectedIds, setSelected, id) => {
+const handleOnSelect = (selectedIds, setSelected, id) => {
   if (selectedIds.includes(id)) {
     setSelected(selectedIds.filter((selectedId) => selectedId !== id));
   } else {
@@ -16,27 +16,32 @@ const renderItem = (selectedIds, setSelected) => ({ item }) => {
 
   return (
     <TouchableOpacity
-    onPress={() => handleOnPress(selectedIds, setSelected, item.id)}
-      style={[
-        styles.item,
-        { backgroundColor: backgroundColor },
-      ]}
+      onPress={() => handleOnSelect(selectedIds, setSelected, item.id)}
+      style={[styles.item, { backgroundColor: backgroundColor }]}
     />
   );
 };
 
 export default function App() {
   const [selectedIds, setSelectedIds] = useState([]);
+  const [data, setData] = useState(DATA);
+
+  const deleteSelectedItems = () => {
+    const newData = data.filter(item => !selectedIds.includes(item.id));
+    setData(newData);
+    setSelectedIds([]); // Clear selection after deletion
+  };
   
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={DATA}
+        data={data}
         renderItem={renderItem(selectedIds, setSelectedIds)}
         keyExtractor={(item) => item.id}
         extraData={selectedIds}
         />
       <Button title="Reset" onPress={() => setSelectedIds([])} />
+      <Button title="Delete" onPress={deleteSelectedItems} />
     </SafeAreaView>
   );
 }
