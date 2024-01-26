@@ -3,14 +3,20 @@ import { FlatList, TouchableOpacity, StyleSheet, SafeAreaView, Button } from 're
 
 const DATA = Array.from({length: 5}, (_, i) => ({id: i.toString()}));
 
+const handleOnPress = (selectedIds, setSelected, id) => {
+  if (selectedIds.includes(id)) {
+    setSelected(selectedIds.filter((selectedId) => selectedId !== id));
+  } else {
+    setSelected([...selectedIds, id]);
+  }
+}
+
 const renderItem = (selectedIds, setSelected) => ({ item }) => {
   const backgroundColor = selectedIds.includes(item.id) ? 'blue' : 'grey';
 
   return (
     <TouchableOpacity
-      onPress={() => {
-        setSelected([...selectedIds, item.id])
-      }}
+    onPress={() => handleOnPress(selectedIds, setSelected, item.id)}
       style={[
         styles.item,
         { backgroundColor: backgroundColor },
